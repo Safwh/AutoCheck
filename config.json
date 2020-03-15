@@ -1,0 +1,13 @@
+{
+  "proxyUrl": "socks5://127.0.0.1:7891",
+  "mysql": [
+    {
+      "name": "XXXXXX",
+      "email": "XXXXXX",
+      "passwd": "XXXXXX",
+      "loginUrl": "XXXXXX",
+      "checkMethods": "POST",
+      "checkUrl": "XXXXXX"
+    }
+  ]
+}
