@@ -10,6 +10,7 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -94,17 +95,17 @@ func login(config MySQLConfig) {
 	form.Add("passwd", config.Passwd)
 	form.Add("remember_me", "week")
 	req, err := http.NewRequest("POST", config.LoginUrl, strings.NewReader(form.Encode()))
-	req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36")
+	req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36")
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8")
 	n := 0
 	resp, err := clientDirect.Do(req)
 	if err != nil || config.Name == "CCCAT" {
 		req, err := http.NewRequest("POST", config.LoginUrl, strings.NewReader(form.Encode()))
-		req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36")
+		req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36")
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8")
 		resp, err = clientProxy.Do(req)
 		if err != nil {
-			tableData = append(tableData, []string{config.Name, "直连登录失败", "代理登录失败"})
+			tableData = append(tableData, []string{config.Name, "登录失败"})
 			return
 		}
 		n = 1
@@ -158,11 +159,24 @@ func check(methods, url, name string, dorP int) {
 		fmt.Println("failed")
 		return
 	}
-	if dorP == 0 {
-		tableData = append(tableData, []string{name, "直连登录成功", value})
+	// 编译正则表达式
+	re, _ := regexp.Compile(`(\d+)( ?MB)`)
+	result := re.FindStringSubmatch(value)
+	if len(result) != 0 {
+		value = result[1]
+		if dorP == 0 {
+			tableData = append(tableData, []string{name, "直连登录成功", "获得了 " + value + " MB"})
 
+		} else {
+			tableData = append(tableData, []string{name, "代理登录成功", "获得了 " + value + " MB"})
+		}
 	} else {
-		tableData = append(tableData, []string{name, "代理登录成功", value})
+		if dorP == 0 {
+			tableData = append(tableData, []string{name, "直连登录成功", value})
+
+		} else {
+			tableData = append(tableData, []string{name, "代理登录成功", value})
+		}
 	}
 }
 
