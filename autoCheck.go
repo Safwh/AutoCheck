@@ -116,11 +116,18 @@ func login(config MySQLConfig) {
 		return
 	}
 	body, _ := ioutil.ReadAll(resp.Body)
-	priceMap := map[string]interface{}{}
+	var priceMap map[string]interface{}
 	err = json.Unmarshal(body, &priceMap)
 	// Check your errors!
 	if err != nil {
 		tableData = append(tableData, []string{config.Name, "登录失败"})
+		return
+	} else if priceMap["ret"] == float64(0) {
+		if msg, ok := priceMap["msg"].(string); ok {
+			tableData = append(tableData, []string{config.Name, msg})
+		} else {
+			tableData = append(tableData, []string{config.Name, "登录失败"})
+		}
 		return
 	}
 	check(config.CheckMethods, config.CheckUrl, config.Name, n)
